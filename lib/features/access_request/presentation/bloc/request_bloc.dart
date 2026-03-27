@@ -1,38 +1,50 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'dart:async';
 import '../../data/repositories/request_repository.dart';
 import 'request_event.dart';
 import 'request_state.dart';
 
-class RequestBloc extends Bloc<RequestEvent, RequestState> {
+class RequestBloc {
+  final _controller = StreamController<RequestState>.broadcast();
+  RequestState _state = RequestInitial();
 
   final RequestRepository repository;
 
-  RequestBloc(this.repository) : super(RequestInitial()) {
+  RequestBloc(this.repository);
 
-    on<CreateRequestEvent>((event, emit) async {
+  Stream<RequestState> get stream => _controller.stream;
+  RequestState get state => _state;
 
-      try {
+  Future<void> add(RequestEvent event) async {
+    if (event is CreateRequestEvent) {
+      await _handleCreateRequest(event);
+    }
+  }
 
-        emit(RequestLoading());
+  Future<void> _handleCreateRequest(CreateRequestEvent event) async {
+    try {
+      _emit(RequestLoading());
 
-        await repository.createRequest({
-          "nom": event.nom,
-          "prenom": event.prenom,
-          "cin": event.cin,
-          "entreprise": event.entreprise,
-          "motif": event.motif,
-          "status": "en attente"
-        });
+      await repository.createRequest({
+        "nom": event.nom,
+        "prenom": event.prenom,
+        "cin": event.cin,
+        "entreprise": event.entreprise,
+        "motif": event.motif,
+        "status": "en attente",
+      });
 
-        emit(RequestSuccess());
+      _emit(RequestSuccess());
+    } catch (e) {
+      _emit(RequestError(e.toString()));
+    }
+  }
 
-      } catch (e) {
+  void _emit(RequestState newState) {
+    _state = newState;
+    _controller.add(newState);
+  }
 
-        emit(RequestError(e.toString()));
-
-      }
-
-    });
-
+  Future<void> close() async {
+    await _controller.close();
   }
 }

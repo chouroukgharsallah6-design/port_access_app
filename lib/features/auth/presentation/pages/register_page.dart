@@ -58,6 +58,7 @@ class RegisterPage extends StatelessWidget {
                   passwordController.text,
                 );
 
+                if (!context.mounted) return;
                 Navigator.pop(context);
               },
             )

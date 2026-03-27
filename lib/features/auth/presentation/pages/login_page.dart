@@ -52,6 +52,7 @@ class LoginPage extends StatelessWidget {
                   passwordController.text,
                 );
 
+                if (!context.mounted) return;
                 Navigator.push(
                   context,
                   MaterialPageRoute(

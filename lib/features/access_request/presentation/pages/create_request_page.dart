@@ -67,6 +67,7 @@ class CreateRequestPage extends StatelessWidget {
                   "status": "en attente"
                 });
 
+                if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Demande envoyée")),
                 );
